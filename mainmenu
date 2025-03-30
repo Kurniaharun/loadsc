@@ -1,0 +1,139 @@
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+
+-- UI Setup
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.ResetOnSpawn = false
+
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.BackgroundColor3 = Color3.new(0, 0, 0)
+Frame.BackgroundTransparency = 0.6
+Frame.Size = UDim2.new(0, 200, 0, 120)
+Frame.Position = UDim2.new(0.5, -100, 0.5, -60)
+Frame.BorderSizePixel = 0
+Frame.ClipsDescendants = true
+
+local UICorner = Instance.new("UICorner", Frame)
+UICorner.CornerRadius = UDim.new(0, 10)
+
+local BypassLabel = Instance.new("TextLabel", Frame)
+BypassLabel.Text = "BYPASS STATUS : ACTIVE"
+BypassLabel.Size = UDim2.new(1, 0, 0.2, 0)
+BypassLabel.BackgroundTransparency = 1
+BypassLabel.TextColor3 = Color3.new(1, 1, 1)
+BypassLabel.TextScaled = false
+BypassLabel.Font = Enum.Font.SourceSansBold
+BypassLabel.TextSize = 14
+
+local AntiDetectLabel = Instance.new("TextLabel", Frame)
+AntiDetectLabel.Text = "ANTI DETECT : ON"
+AntiDetectLabel.Size = UDim2.new(1, 0, 0.2, 0)
+AntiDetectLabel.Position = UDim2.new(0, 0, 0.2, 0)
+AntiDetectLabel.BackgroundTransparency = 1
+AntiDetectLabel.TextColor3 = Color3.new(1, 1, 1)
+AntiDetectLabel.TextScaled = false
+AntiDetectLabel.Font = Enum.Font.SourceSansBold
+AntiDetectLabel.TextSize = 14
+
+local HWIDLabel = Instance.new("TextLabel", Frame)
+HWIDLabel.Text = "HWID SPOOFER : Generating..."
+HWIDLabel.Size = UDim2.new(1, 0, 0.2, 0)
+HWIDLabel.Position = UDim2.new(0, 0, 0.4, 0)
+HWIDLabel.BackgroundTransparency = 1
+HWIDLabel.TextColor3 = Color3.new(1, 1, 1)
+HWIDLabel.TextScaled = false
+HWIDLabel.Font = Enum.Font.SourceSansBold
+HWIDLabel.TextSize = 14
+
+local MinimizeButton = Instance.new("TextButton", Frame)
+MinimizeButton.Text = "-"
+MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
+MinimizeButton.Position = UDim2.new(1, -25, 0, 5)
+MinimizeButton.BackgroundTransparency = 1
+MinimizeButton.TextColor3 = Color3.new(1, 1, 1)
+MinimizeButton.TextScaled = true
+MinimizeButton.Font = Enum.Font.SourceSansBold
+
+local RunScriptButton = Instance.new("TextButton", Frame)
+RunScriptButton.Text = "Run Script"
+RunScriptButton.Size = UDim2.new(1, 0, 0.2, 0)
+RunScriptButton.Position = UDim2.new(0, 0, 0.7, 0)
+RunScriptButton.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+RunScriptButton.TextColor3 = Color3.new(1, 1, 1)
+RunScriptButton.TextScaled = false
+RunScriptButton.Font = Enum.Font.SourceSansBold
+RunScriptButton.TextSize = 14
+
+RunScriptButton.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Kurniaharun/loadsc/refs/heads/main/SCprem"))()
+end)
+
+-- Fade In Animation
+Frame.BackgroundTransparency = 1
+local fadeIn = TweenService:Create(Frame, TweenInfo.new(1), {BackgroundTransparency = 0.6})
+fadeIn:Play()
+fadeIn.Completed:Wait()
+
+-- HWID Spoofer (Randomizer setiap 1 detik)
+function generateHWID()
+    local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    local hwid = ""
+    for i = 1, 12 do
+        hwid = hwid .. chars:sub(math.random(1, #chars), math.random(1, #chars))
+        if i % 4 == 0 and i < 12 then
+            hwid = hwid .. "-"
+        end
+    end
+    return hwid
+end
+
+RunService.RenderStepped:Connect(function()
+    HWIDLabel.Text = "HWID SPOOFER : " .. generateHWID()
+end)
+
+-- Make UI Draggable
+local dragging, dragInput, startPos, startPosInput
+
+Frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        startPos = Frame.Position
+        startPosInput = input.Position
+    end
+end)
+
+Frame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - startPosInput
+        Frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- Minimize Functionality
+MinimizeButton.MouseButton1Click:Connect(function()
+    Frame.Visible = false
+    wait(0.1)
+    local OpenButton = Instance.new("TextButton", ScreenGui)
+    OpenButton.Text = "Open UI"
+    OpenButton.Size = UDim2.new(0, 100, 0, 30)
+    OpenButton.Position = UDim2.new(0, 10, 1, -40)
+    OpenButton.BackgroundColor3 = Color3.new(0, 0, 0)
+    OpenButton.TextColor3 = Color3.new(1, 1, 1)
+    OpenButton.TextScaled = false
+    OpenButton.Font = Enum.Font.SourceSansBold
+    OpenButton.TextSize = 14
+
+    OpenButton.MouseButton1Click:Connect(function()
+        Frame.Visible = true
+        OpenButton:Destroy()
+    end)
+end)
