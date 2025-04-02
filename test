@@ -1,0 +1,72 @@
+local HttpService = game:GetService("HttpService")
+
+-- Ambil ID tempat yang sedang dimainkan
+local placeId = game.PlaceId
+local gameId = game.GameId
+
+-- Ambil Nama Game
+local gameName = game:GetService("MarketplaceService"):GetProductInfo(placeId).Name
+
+-- Menampilkan Nama Game yang sedang dimainkan
+print("Game Name: " .. gameName)
+
+-- Fungsi untuk mencari script acak berdasarkan nama game
+local function getRandomScript(gameName)
+    local apiUrl = "https://rscripts.net/api/v2/scripts?page=1&orderBy=date&sort=desc"
+    
+    -- Mengambil daftar script dari API
+    local success, response = pcall(function()
+        return HttpService:GetAsync(apiUrl)
+    end)
+    
+    if success then
+        local data = HttpService:JSONDecode(response)
+        
+        -- Filter script berdasarkan nama game (misalnya dengan mencocokkan nama game)
+        local filteredScripts = {}
+        
+        for _, script in ipairs(data.scripts) do
+            if string.find(script.title:lower(), gameName:lower()) then
+                table.insert(filteredScripts, script)
+            end
+        end
+        
+        if #filteredScripts > 0 then
+            -- Ambil script acak
+            local randomIndex = math.random(1, #filteredScripts)
+            local randomScript = filteredScripts[randomIndex]
+            
+            print("Script ditemukan: " .. randomScript.title)
+            
+            -- Mengambil script content dan mengeksekusinya
+            local scriptUrl = randomScript.rawScript
+            
+            local scriptSuccess, scriptContent = pcall(function()
+                return HttpService:GetAsync(scriptUrl)
+            end)
+            
+            if scriptSuccess then
+                -- Menjalankan script yang ditemukan
+                print("Menjalankan script...")
+                local success, errorMessage = pcall(function()
+                    loadstring(scriptContent)()
+                end)
+                
+                if success then
+                    print("Script berhasil dijalankan!")
+                else
+                    print("Error dalam menjalankan script: " .. errorMessage)
+                end
+            else
+                print("Gagal mengambil script: " .. scriptContent)
+            end
+        else
+            print("Tidak ada script yang ditemukan untuk game: " .. gameName)
+        end
+    else
+        print("Gagal mengambil daftar script: " .. response)
+    end
+end
+
+-- Panggil fungsi untuk mencari dan mengeksekusi script berdasarkan game yang sedang dimainkan
+getRandomScript(gameName)
